@@ -123,17 +123,23 @@ class CNF {
 /*
 * input string: 
 * 1. cnf = clause1&cluase2 ...
-* 2. clause = r|!p|q ...
+* 2. clause = (r|!p|q ... )
 */
 CNF string2CNF(String string) {
+    Pattern clausePattern = Pattern.compile("\\(.*\\)");
     Pattern symbolPattern = Pattern.compile("!?(.*)");
     Pattern notPattern = Pattern.compile("!");
     ArrayList<Clause> clauseList = new ArrayList<Clause>();
+    // 1. use "&" to split input string into several clauses
     String[] clauseStringList = string.split("&");
     for(String clauseString : clauseStringList) {
-        String[] literalStringList = clauseString.split("\\|");
+        Matcher clausMatcher = clausePattern.matcher(clauseString);
+        clausMatcher.find();
+        // 2. use "|" to split each clause into several literals
+        String[] literalStringList = clausMatcher.group(0).split("\\|");
         Literal[] literalList = new Literal[literalStringList.length];
         for(int i = 0; i < literalStringList.length; i++) {
+            // 3. construct CNF bottom up: literal -> clause -> CNF
             Matcher symbolMatcher = symbolPattern.matcher(literalStringList[i]);
             Matcher notMatcher = notPattern.matcher(literalStringList[i]);
             symbolMatcher.find();
