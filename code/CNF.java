@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class Literal {
     private final String symbol;
@@ -118,9 +120,30 @@ class CNF {
     }
 }
 
-class CNFConstructor {
-
+/*
+* input string: 
+* 1. cnf = clause1&cluase2 ...
+* 2. clause = r|!p|q ...
+*/
+CNF string2CNF(String string) {
+    Pattern symbolPattern = Pattern.compile("!?(.*)");
+    Pattern notPattern = Pattern.compile("!");
+    ArrayList<Clause> clauseList = new ArrayList<Clause>();
+    String[] clauseStringList = string.split("&");
+    for(String clauseString : clauseStringList) {
+        String[] literalStringList = clauseString.split("\\|");
+        Literal[] literalList = new Literal[literalStringList.length];
+        for(int i = 0; i < literalStringList.length; i++) {
+            Matcher symbolMatcher = symbolPattern.matcher(literalStringList[i]);
+            Matcher notMatcher = notPattern.matcher(literalStringList[i]);
+            symbolMatcher.find();
+            literalList[i] = new Literal(symbolMatcher.group(1), -1, notMatcher.find());
+        }
+        clauseList.add(new Clause(literalList));
+    }
+    return new CNF(clauseList);
 }
+
 
 class CDCLSolver {
 
