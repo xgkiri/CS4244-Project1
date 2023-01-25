@@ -125,32 +125,35 @@ class CNF {
 * 1. cnf = clause1&cluase2 ...
 * 2. clause = (r|!p|q ... )
 */
-CNF string2CNF(String string) {
-    Pattern clausePattern = Pattern.compile("\\(.*\\)");
-    Pattern symbolPattern = Pattern.compile("!?(.*)");
-    Pattern notPattern = Pattern.compile("!");
-    ArrayList<Clause> clauseList = new ArrayList<Clause>();
-    // 1. use "&" to split input string into several clauses
-    String[] clauseStringList = string.split("&");
-    for(String clauseString : clauseStringList) {
-        Matcher clausMatcher = clausePattern.matcher(clauseString);
-        clausMatcher.find();
-        // 2. use "|" to split each clause into several literals
-        String[] literalStringList = clausMatcher.group(0).split("\\|");
-        Literal[] literalList = new Literal[literalStringList.length];
-        for(int i = 0; i < literalStringList.length; i++) {
-            // 3. construct CNF bottom up: literal -> clause -> CNF
-            Matcher symbolMatcher = symbolPattern.matcher(literalStringList[i]);
-            Matcher notMatcher = notPattern.matcher(literalStringList[i]);
-            symbolMatcher.find();
-            literalList[i] = new Literal(symbolMatcher.group(1), -1, notMatcher.find());
+
+class CNFconstructor {
+    private final Pattern clausePattern = Pattern.compile("\\((.*)\\)");
+    private final Pattern symbolPattern = Pattern.compile("!?(.*)");
+    private final Pattern notPattern = Pattern.compile("!");
+
+    CNF string2CNF(String string) {
+        ArrayList<Clause> clauseList = new ArrayList<Clause>();
+        // 1. use "&" to split input string into several clauses
+        String[] clauseStringList = string.split("&");
+        for(String clauseString : clauseStringList) {
+            Matcher clausMatcher = clausePattern.matcher(clauseString);
+            clausMatcher.find();
+            // 2. use "|" to split each clause into several literals
+            String[] literalStringList = clausMatcher.group(1).split("\\|");
+            Literal[] literalList = new Literal[literalStringList.length];
+            for(int i = 0; i < literalStringList.length; i++) {
+                // 3. construct CNF bottom up: literal -> clause -> CNF
+                Matcher symbolMatcher = symbolPattern.matcher(literalStringList[i]);
+                Matcher notMatcher = notPattern.matcher(literalStringList[i]);
+                symbolMatcher.find();
+                literalList[i] = new Literal(symbolMatcher.group(1), -1, notMatcher.find());
+            }
+            clauseList.add(new Clause(literalList));
         }
-        clauseList.add(new Clause(literalList));
+        return new CNF(clauseList);
     }
-    return new CNF(clauseList);
-}
 
-
-class CDCLSolver {
-
+    public String toString() {
+        return "CNF constructor usage:\n1. clause1&cluase2 ...\n2. clause = (r|!p|q ... )";
+    }
 }
