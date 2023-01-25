@@ -51,6 +51,7 @@ class Literal {
     }
 }
 
+
 class Clause {
     private Literal[] literals;
 
@@ -59,13 +60,21 @@ class Clause {
     }
 
     boolean isFalse() {
-        boolean flag = true;
         for(Literal literal : literals) {
             if(literal.getValue() != 0) {
-                flag = false;
+                return false;
             }
         }
-        return flag;
+        return true;
+    }
+
+    boolean contain(Literal otherLiteral) {
+        for(Literal literal : this.literals) {
+            if(literal.sameLiteral(otherLiteral)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void assign(Literal literal, int value) {
@@ -74,6 +83,15 @@ class Clause {
                 this.literals[i].assign(value);
             }
         }
+    }
+
+    Literal findUnassignedLiteral() {
+        for(Literal literal : this.literals) {
+            if(literal.noAssignment()) {
+                return literal;
+            }
+        }
+        return null;
     }
 
     public String toString() {
@@ -88,6 +106,7 @@ class Clause {
         return clauseString;
     }
 }
+
 
 class CNF {
     private ArrayList<Clause> clauses;
@@ -105,6 +124,24 @@ class CNF {
         for(Clause clause : this.clauses) {
             clause.assign(literal, value);
         }
+    }
+
+    Literal findUnassignedLiteral() {
+        for(Clause clause : this.clauses) {
+            if(clause.findUnassignedLiteral() != null) {
+                return clause.findUnassignedLiteral();
+            }
+        }
+        return null;
+    }
+
+    boolean haveConflict() {
+        for(Clause clause : this.clauses) {
+            if(clause.isFalse()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String toString() {

@@ -2,12 +2,10 @@ import java.util.ArrayList;
 
 class Solver {
     private CNF cnf;
-    private int level;
     private Trace trace;
     
     Solver(CNF cnf) {
         this.cnf = cnf;
-        this.level = 0;
         this.trace = new Trace(new ArrayList<TraceUnit>());
     }
 
@@ -15,12 +13,24 @@ class Solver {
         // main method to solve SAT problem
     }
 
-    void unitPropagation() {
+    Literal findUnassignedLiteral() {
+        // NOTE: can be improved by using a better heuristic?
+        // see 2.(1) PickBranchingVariable
+        return this.cnf.findUnassignedLiteral();
+    }
+
+    void unitPropagation(Literal literal) {
         // do unit propagation after an assignment
+        this.cnf.assign(literal, literal.getValue());
+    }
+
+    boolean findConflict() {
+        return this.cnf.haveConflict();
     }
 
     void learnFromConflict() {  
         // learn new clause and add it into CNF
+
     }
     
     void backtrack() {
