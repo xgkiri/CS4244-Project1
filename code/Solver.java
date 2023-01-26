@@ -10,11 +10,11 @@ class Solver {
         this.trace = new Trace(new ArrayList<TraceUnit>());
         this.currentLevel = 0;
     }
-
+    /* 
     CNF solveSAT() {
         // main method to solve SAT problem
     }
-
+    */
     boolean doOneDecision() {
         Literal literal = findUnassignedLiteral();
         if(literal == null) {

@@ -43,7 +43,7 @@ class Literal {
 
     boolean sameLiteral(Literal other) {
         // NOTE: just compare the "symbol" field, do not care about "haveNot" field
-        return this.symbol == other.symbol;
+        return this.symbol.equals(other.symbol);
     }
 
     public String toString() {
@@ -178,9 +178,10 @@ class CNF {
 
     TraceUnit findPropagationUnit() {
         for(Clause clause : this.clauses) {
-            if(clause.findPropagationLiteral() != null) {
+            Literal literal = clause.findPropagationLiteral();
+            if(literal != null) {
                 // NOTE: here just set level to 0
-                return new TraceUnit(clause.findPropagationLiteral(), clause, 0);
+                return new TraceUnit(literal, clause, 0);
             }
         }
         return null;
@@ -206,9 +207,15 @@ class CNF {
 */
 
 class CNFconstructor {
-    private final Pattern clausePattern = Pattern.compile("\\((.*)\\)");
-    private final Pattern symbolPattern = Pattern.compile("!?(.*)");
-    private final Pattern notPattern = Pattern.compile("!");
+    private final Pattern clausePattern;
+    private final Pattern symbolPattern;
+    private final Pattern notPattern;
+
+    CNFconstructor(){
+        this.clausePattern = Pattern.compile("\\((.*)\\)");
+        this.symbolPattern = Pattern.compile("!?(.*)");
+        this.notPattern = Pattern.compile("!");
+    }
 
     CNF string2CNF(String string) {
         ArrayList<Clause> clauseList = new ArrayList<Clause>();
