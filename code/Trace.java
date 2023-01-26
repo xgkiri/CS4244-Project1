@@ -3,7 +3,7 @@ import java.util.ArrayList;
 class TraceUnit {
     private final Literal literal;
     private final Clause clause;
-    // decision node: clause = null 
+    // decision unit: clause = null 
     private final int level;
 
     TraceUnit(Literal literal, Clause clause, int level) {
@@ -20,8 +20,13 @@ class TraceUnit {
         return this.level == level;
     }
 
-    boolean isDecisionNode() {
+    boolean isDecisionUnit() {
         return this.clause == null;
+    }
+
+    boolean isDirectSuccessorOf(TraceUnit traceUnit) {
+        return this.clause.contains(traceUnit.literal) && 
+              !this.literal.sameLiteral(traceUnit.literal);
     }
 
     public String toString() {
@@ -43,7 +48,7 @@ class Trace {
     }
 
     void removeTraceUnitLevel(int level) {
-        // remove traceUnit whose level is more than given one
+        // remove traceUnit whose level is more than the given one
         for(TraceUnit traceUnit : this.traceUnits) {
             if(traceUnit.levelMoreThan(level)) {
                 this.traceUnits.remove(traceUnit);
@@ -52,9 +57,9 @@ class Trace {
     }
 
     TraceUnit findUIP() {
-        // simple way: use the current level's decision node
+        // simple way: use the current level's decision unit
         for(TraceUnit traceUnit : this.traceUnits) {
-            if(traceUnit.atLevel(currentLevel) && traceUnit.isDecisionNode()) {
+            if(traceUnit.atLevel(currentLevel) && traceUnit.isDecisionUnit()) {
                 return traceUnit;
             }
         }
@@ -64,7 +69,39 @@ class Trace {
          * improvement can be made by finding first UIP
          * see 2.(2) ConflictAnalysis
          */ 
+    }
 
+    ArrayList<TraceUnit> findSuccessor(TraceUnit traceUnit) {
+        // use DFS to find successors of the given trace unit (in a multi-connected directed graph)
+        ArrayList<TraceUnit> successorList = new ArrayList<TraceUnit>();
+        DFS(successorList, traceUnit);
+        return successorList;
+    }
+
+    void DFS(ArrayList<TraceUnit> successorList, TraceUnit traceUnit) {
+        ArrayList<TraceUnit> directSuccessorList = findDirectSuccessor(traceUnit);
+        if(directSuccessorList.isEmpty()) {
+            return;
+        }
+        else {
+            for(TraceUnit directSuccessor : directSuccessorList) {
+                // multi-connected graph
+                if(!successorList.contains(directSuccessor)) {
+                    successorList.add(directSuccessor);
+                    DFS(successorList, directSuccessor);
+                }
+            }
+        }
+    }
+
+    ArrayList<TraceUnit> findDirectSuccessor(TraceUnit ancestor) {
+        ArrayList<TraceUnit> directSuccessorList = new ArrayList<TraceUnit>();
+        for(TraceUnit traceUnit : this.traceUnits) {
+            if(traceUnit.isDirectSuccessorOf(ancestor)) {
+                directSuccessorList.add(traceUnit);
+            }
+        }
+        return directSuccessorList;
     }
 
     public String toString() {

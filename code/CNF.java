@@ -68,7 +68,7 @@ class Clause {
         return true;
     }
 
-    boolean contain(Literal otherLiteral) {
+    boolean contains(Literal otherLiteral) {
         for(Literal literal : this.literals) {
             if(literal.sameLiteral(otherLiteral)) {
                 return true;
