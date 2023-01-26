@@ -12,6 +12,14 @@ class TraceUnit {
         this.level = level;
     }
 
+    Literal getLiteral() {
+        return this.literal;
+    }
+
+    TraceUnit setLevel(int level) {
+        return new TraceUnit(this.literal, this.clause, level);
+    }
+
     boolean levelMoreThan(int level) {
         return this.level > level;
     }

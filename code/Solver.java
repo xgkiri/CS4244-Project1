@@ -3,14 +3,31 @@ import java.util.ArrayList;
 class Solver {
     private CNF cnf;
     private Trace trace;
+    private int currentLevel;
     
     Solver(CNF cnf) {
         this.cnf = cnf;
         this.trace = new Trace(new ArrayList<TraceUnit>());
+        this.currentLevel = 0;
     }
 
     CNF solveSAT() {
         // main method to solve SAT problem
+    }
+
+    boolean doOneDecision() {
+        Literal literal = findUnassignedLiteral();
+        if(literal == null) {
+            return false;
+        }
+        else {
+            currentLevel += 1;
+            // NOTE: always set value = 1?
+            broadcastAssign(literal, 1);
+            TraceUnit traceUnit = new TraceUnit(literal, null, currentLevel);
+            this.trace.addTraceUnit(traceUnit);
+            return true;
+        }
     }
 
     Literal findUnassignedLiteral() {
@@ -19,9 +36,17 @@ class Solver {
         return this.cnf.findUnassignedLiteral();
     }
 
-    void unitPropagation(Literal literal) {
+    void broadcastAssign(Literal literal, int value) {
+        this.cnf.assign(literal, value);
+    }
+
+    void unitPropagation() {
         // do unit propagation after an assignment
-        this.cnf.assign(literal, literal.getValue());
+        while(this.cnf.findPropagationUnit() != null) {
+            TraceUnit traceUnit = this.cnf.findPropagationUnit();
+            this.trace.addTraceUnit(traceUnit.setLevel(this.currentLevel));
+            broadcastAssign(traceUnit.getLiteral(), traceUnit.getLiteral().getValue());
+        }
     }
 
     boolean findConflict() {

@@ -17,6 +17,10 @@ class Literal {
         this.haveNot = haveNot;
     }
 
+    boolean haveNot() {
+        return this.haveNot;
+    }
+
     void assign(int assignment) {
         this.assignment = assignment;
     }
@@ -38,6 +42,7 @@ class Literal {
     }
 
     boolean sameLiteral(Literal other) {
+        // NOTE: just compare the "symbol" field, do not care about "haveNot" field
         return this.symbol == other.symbol;
     }
 
@@ -94,6 +99,33 @@ class Clause {
         return null;
     }
 
+    Literal findPropagationLiteral() {
+        int unassignedNumber = 0;
+        for(Literal literal : this.literals) {
+            if(literal.noAssignment()) {
+                unassignedNumber += 1;
+            }
+            else if(literal.getValue() == 1) {
+                return null;
+            }
+        }
+        if(unassignedNumber == 1) {
+            for(Literal literal : this.literals) {
+                if(literal.noAssignment()) {
+                    // NOTE: return assigned literal
+                    if(literal.haveNot()) {
+                        literal.assign(0);
+                    }
+                    else {
+                        literal.assign(1);
+                    }
+                    return literal;
+                }
+            }
+        }
+        return null;
+    }
+
     public String toString() {
         String clauseString = "[";
         for(int i = 0; i < this.literals.length; i++) {
@@ -142,6 +174,16 @@ class CNF {
             }
         }
         return false;
+    }
+
+    TraceUnit findPropagationUnit() {
+        for(Clause clause : this.clauses) {
+            if(clause.findPropagationLiteral() != null) {
+                // NOTE: here just set level to 0
+                return new TraceUnit(clause.findPropagationLiteral(), clause, 0);
+            }
+        }
+        return null;
     }
 
     public String toString() {
