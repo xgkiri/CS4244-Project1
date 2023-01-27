@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.*;
 
 class Literal {
     private final String symbol;
@@ -160,8 +161,9 @@ class CNF {
 
     Literal findUnassignedLiteral() {
         for(Clause clause : this.clauses) {
-            if(clause.findUnassignedLiteral() != null) {
-                return clause.findUnassignedLiteral();
+            Literal literal = clause.findUnassignedLiteral();
+            if(literal != null) {
+                return literal;
             }
         }
         return null;
@@ -181,7 +183,8 @@ class CNF {
             Literal literal = clause.findPropagationLiteral();
             if(literal != null) {
                 // NOTE: here just set level to 0
-                return new TraceUnit(literal, clause, 0);
+                TraceUnit traceUnit = new TraceUnit(literal, clause, 0);
+                return traceUnit;
             }
         }
         return null;

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.io.*;
 
 class Solver {
     private CNF cnf;
@@ -42,10 +43,15 @@ class Solver {
 
     void unitPropagation() {
         // do unit propagation after an assignment
-        while(this.cnf.findPropagationUnit() != null) {
+        while(true) {
             TraceUnit traceUnit = this.cnf.findPropagationUnit();
-            this.trace.addTraceUnit(traceUnit.setLevel(this.currentLevel));
-            broadcastAssign(traceUnit.getLiteral(), traceUnit.getLiteral().getValue());
+            if(traceUnit == null) {
+                break;
+            }
+            else{
+                this.trace.addTraceUnit(traceUnit.setLevel(this.currentLevel));
+                broadcastAssign(traceUnit.getLiteral(), traceUnit.getLiteral().getValue());
+            }
         }
     }
 
