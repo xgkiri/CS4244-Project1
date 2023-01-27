@@ -34,11 +34,19 @@ class TraceUnit {
 
     boolean isDirectSuccessorOf(TraceUnit traceUnit) {
         return this.clause.contains(traceUnit.literal) && 
-              !this.literal.sameLiteral(traceUnit.literal);
+                !this.literal.sameLiteral(traceUnit.literal);
     }
 
     public String toString() {
-        return this.literal.toString() + this.clause.toString() + " level = " + this.level;
+        String traceUnitString = this.literal.toString();
+        if(this.clause == null) {
+            traceUnitString += "[Decision Unit]";    
+        }
+        else {
+            traceUnitString += this.clause.toString();
+        }
+        traceUnitString += (" level = " + this.level);
+        return traceUnitString;
     }
 }
 
@@ -117,7 +125,7 @@ class Trace {
         for(int i = 0; i < this.traceUnits.size(); i++) {
             traceString += this.traceUnits.get(i).toString();
             if(i != this.traceUnits.size() - 1) {
-                traceString += ", ";
+                traceString += ",\n";
             }
         }
         traceString += "}";

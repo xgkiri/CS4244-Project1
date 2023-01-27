@@ -67,4 +67,10 @@ class Solver {
     void backtrack() {
         // when conflict occur, after learning from it, go back to certain level
     }
+
+    public String toString() {
+        return "\n---CNF---\n" + this.cnf.toString() + "\n\n" + 
+                    "---trace---\n" + this.trace.toString() + "\n\n" + 
+                    "---current level---\n" + this.currentLevel;
+    }
 }
