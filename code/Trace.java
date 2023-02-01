@@ -16,6 +16,10 @@ class TraceUnit {
         return this.literal;
     }
 
+    int getLevel() {
+        return this.level;
+    }
+
     TraceUnit setLevel(int level) {
         return new TraceUnit(this.literal, this.clause, level);
     }
@@ -33,8 +37,13 @@ class TraceUnit {
     }
 
     boolean isDirectSuccessorOf(TraceUnit traceUnit) {
-        return this.clause.contains(traceUnit.literal) && 
+        if(this.clause == null) {
+            return false;
+        }
+        else {
+            return this.clause.contains(traceUnit.literal) && 
                 !this.literal.sameLiteral(traceUnit.literal);
+        }
     }
 
     public String toString() {
@@ -52,11 +61,9 @@ class TraceUnit {
 
 class Trace {
     private ArrayList<TraceUnit> traceUnits;
-    private int currentLevel;
 
     Trace(ArrayList<TraceUnit> traceUnits) {
         this.traceUnits = traceUnits;
-        this.currentLevel = 0;
     }
 
     void addTraceUnit(TraceUnit traceUnit) {
@@ -72,7 +79,7 @@ class Trace {
         }
     }
 
-    TraceUnit findUIP() {
+    TraceUnit findUIP(int currentLevel) {
         // simple way: use the current level's decision unit
         for(TraceUnit traceUnit : this.traceUnits) {
             if(traceUnit.atLevel(currentLevel) && traceUnit.isDecisionUnit()) {
@@ -118,6 +125,16 @@ class Trace {
             }
         }
         return directSuccessorList;
+    }
+
+    ArrayList<TraceUnit> getComplement(ArrayList<TraceUnit> listToExclude) {
+        ArrayList<TraceUnit> complementList = new ArrayList<TraceUnit>();
+        for(TraceUnit traceUnit : this.traceUnits) {
+            if(!listToExclude.contains(traceUnit)) {
+                complementList.add(traceUnit);
+            }
+        }
+        return complementList;
     }
 
     public String toString() {

@@ -47,6 +47,15 @@ class Literal {
         return this.symbol.equals(other.symbol);
     }
 
+    Literal reverse() {
+        if(this.haveNot) {
+            return new Literal(this.symbol, -1, false);
+        }
+        else {
+            return new Literal(this.symbol, -1, true);
+        }
+    }
+
     public String toString() {
         if(this.haveNot == false) {
             return this.symbol + "(" + this.assignment + ")";
