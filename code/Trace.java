@@ -46,6 +46,7 @@ class TraceUnit {
         }
     }
 
+    @Override
     public String toString() {
         String traceUnitString = this.literal.toString();
         if(this.clause == null) {
@@ -76,11 +77,15 @@ class Trace {
 
     void removeTraceUnitLevel(int level) {
         // remove traceUnit whose level is more than the given one
+        ArrayList<TraceUnit> newList = new ArrayList<TraceUnit>();
         for(TraceUnit traceUnit : this.traceUnits) {
-            if(traceUnit.levelMoreThan(level)) {
-                this.traceUnits.remove(traceUnit);
+            // do not use "remove" here, will cause ConcurrentModificationException
+            // create a new list instead
+            if(!traceUnit.levelMoreThan(level)) {
+                newList.add(traceUnit);
             }
         }
+        this.traceUnits = newList;
     }
 
     TraceUnit findUIP(int currentLevel) {
@@ -141,6 +146,7 @@ class Trace {
         return complementList;
     }
 
+    @Override
     public String toString() {
         String traceString = "{";
         for(int i = 0; i < this.traceUnits.size(); i++) {

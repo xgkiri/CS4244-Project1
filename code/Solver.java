@@ -11,11 +11,32 @@ class Solver {
         this.trace = new Trace(new ArrayList<TraceUnit>());
         this.currentLevel = 0;
     }
-    /* 
+    
     CNF solveSAT() {
         // main method to solve SAT problem
+        CNF cnfCopy = this.cnf;
+        while(true) {
+            if(doOneDecision() == true) {
+                // have unassigned literal
+                unitPropagation();
+                if(findConflict()) {
+                    if(currentLevel == 0) {
+                        // UNSAT
+                        return null;
+                    }
+                    else {
+                        backTrack(learnFromConflict());
+                    }
+                }
+            }
+            else {
+                // have no unassigned literal --> SAT solved
+                reAssignFromTrace(cnfCopy , this.trace);
+                return cnfCopy;
+            }
+        }
     }
-    */
+
     boolean doOneDecision() {
         Literal literal = findUnassignedLiteral();
         if(literal == null) {
@@ -64,7 +85,16 @@ class Solver {
     }
 
     boolean findConflict() {
-        return this.cnf.haveConflict();
+        Clause conflictClause = this.cnf.findConflictClause();
+        if(conflictClause != null) {
+            this.trace.addTraceUnit(
+                new TraceUnit(new Literal("#", -1, false), 
+                conflictClause, currentLevel));
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     int learnFromConflict() {  
@@ -132,16 +162,24 @@ class Solver {
         // when conflict occur, after learning from it, go back to certain level
         this.trace.removeTraceUnitLevel(level);
         this.currentLevel = level;
-        reAssignment();
+        reAssignFromTrace(this.trace);
     }
 
-    void reAssignment() {
+    void reAssignFromTrace(Trace trace) {
         this.cnf.clearAssignment();
-        for(TraceUnit traceUnit : this.trace.getTraceUnits()) {
+        for(TraceUnit traceUnit : trace.getTraceUnits()) {
             this.cnf.assign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
         }
     }
 
+    void reAssignFromTrace(CNF cnf, Trace trace) {
+        cnf.clearAssignment();
+        for(TraceUnit traceUnit : trace.getTraceUnits()) {
+            cnf.assign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
+        }
+    }
+
+    @Override
     public String toString() {
         return "\n---CNF---\n" + this.cnf.toString() + "\n\n" + 
                     "---trace---\n" + this.trace.toString() + "\n\n" + 

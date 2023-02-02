@@ -67,6 +67,7 @@ class Literal {
         this.assignment = -1;
     }
 
+    @Override
     public String toString() {
         if(this.haveNot == false) {
             return this.symbol + "(" + this.assignment + ")";
@@ -153,6 +154,7 @@ class Clause {
         }
     }
 
+    @Override
     public String toString() {
         String clauseString = "[";
         for(int i = 0; i < this.literals.length; i++) {
@@ -195,13 +197,13 @@ class CNF {
         return null;
     }
 
-    boolean haveConflict() {
+    Clause findConflictClause() {
         for(Clause clause : this.clauses) {
             if(clause.isFalse()) {
-                return true;
+                return clause;
             }
         }
-        return false;
+        return null;
     }
 
     TraceUnit findPropagationUnit() {
@@ -222,6 +224,7 @@ class CNF {
         }
     }
 
+    @Override
     public String toString() {
         String cnfString = "{";
         for(int i = 0; i < this.clauses.size(); i++) {
@@ -274,6 +277,7 @@ class CNFconstructor {
         return new CNF(clauseList);
     }
 
+    @Override
     public String toString() {
         return "CNF constructor usage:\n1. clause1&cluase2 ...\n2. clause = (r|!p|q ... )";
     }
