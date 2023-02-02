@@ -26,6 +26,10 @@ class Literal {
         this.assignment = assignment;
     }
 
+    int getAssignment() {
+        return this.assignment;
+    }
+
     int getValue() {
         if(this.assignment == -1) {
             return -1;
@@ -47,13 +51,20 @@ class Literal {
         return this.symbol.equals(other.symbol);
     }
 
-    Literal reverse() {
-        if(this.haveNot) {
+    Literal assignmentReverse() {
+        if(this.assignment == 1) {
             return new Literal(this.symbol, -1, false);
         }
-        else {
+        else if(this.assignment == 0) {
             return new Literal(this.symbol, -1, true);
         }
+        else {
+            return null;
+        }
+    }
+
+    void clearAssignment() {
+        this.assignment = -1;
     }
 
     public String toString() {
@@ -136,6 +147,12 @@ class Clause {
         return null;
     }
 
+    void clearAssignment() {
+        for(Literal literal : this.literals) {
+            literal.clearAssignment();
+        }
+    }
+
     public String toString() {
         String clauseString = "[";
         for(int i = 0; i < this.literals.length; i++) {
@@ -197,6 +214,12 @@ class CNF {
             }
         }
         return null;
+    }
+
+    void clearAssignment() {
+        for(Clause clause : this.clauses) {
+            clause.clearAssignment();
+        }
     }
 
     public String toString() {

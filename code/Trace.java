@@ -66,6 +66,10 @@ class Trace {
         this.traceUnits = traceUnits;
     }
 
+    ArrayList<TraceUnit> getTraceUnits() {
+        return this.traceUnits;
+    }
+
     void addTraceUnit(TraceUnit traceUnit) {
         this.traceUnits.add(traceUnit);
     }

@@ -23,8 +23,7 @@ class Solver {
         }
         else {
             currentLevel += 1;
-            // NOTE: always set value = 1?
-            broadcastAssign(literal, 1);
+            broadcastAssign(literal);
             TraceUnit traceUnit = new TraceUnit(literal, null, currentLevel);
             this.trace.addTraceUnit(traceUnit);
             return true;
@@ -41,6 +40,15 @@ class Solver {
         this.cnf.assign(literal, value);
     }
 
+    void broadcastAssign(Literal literal) {
+        if(literal.haveNot()) {
+            this.cnf.assign(literal, 0);
+        }
+        else {
+            this.cnf.assign(literal, 1);
+        }
+    }
+
     void unitPropagation() {
         // do unit propagation after an assignment
         while(true) {
@@ -50,7 +58,7 @@ class Solver {
             }
             else{
                 this.trace.addTraceUnit(traceUnit.setLevel(this.currentLevel));
-                broadcastAssign(traceUnit.getLiteral(), traceUnit.getLiteral().getValue());
+                broadcastAssign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
             }
         }
     }
@@ -102,7 +110,7 @@ class Solver {
                     secondLevel = compTU.getLevel();
                 }
                 // reverse literal
-                literals.add(compTU.getLiteral().reverse());
+                literals.add(compTU.getLiteral().assignmentReverse());
             }
         }
         // create new clause and add it into cnf
@@ -122,7 +130,16 @@ class Solver {
     
     void backTrack(int level) {
         // when conflict occur, after learning from it, go back to certain level
+        this.trace.removeTraceUnitLevel(level);
+        this.currentLevel = level;
+        reAssignment();
+    }
 
+    void reAssignment() {
+        this.cnf.clearAssignment();
+        for(TraceUnit traceUnit : this.trace.getTraceUnits()) {
+            this.cnf.assign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
+        }
     }
 
     public String toString() {
