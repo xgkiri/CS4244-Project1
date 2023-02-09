@@ -1,7 +1,12 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.*;
 
 class Literal {
     private final String symbol;
@@ -169,7 +174,7 @@ class Clause {
 }
 
 
-class CNF {
+class CNF implements Serializable{
     private ArrayList<Clause> clauses;
 
     CNF(ArrayList<Clause> clauses) {
@@ -223,6 +228,26 @@ class CNF {
             clause.clearAssignment();
         }
     }
+
+    CNF deepClone() {
+		CNF copy = null;
+		PipedOutputStream out=new PipedOutputStream();
+		PipedInputStream in=new PipedInputStream();
+		try {
+			in.connect(out);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try(ObjectOutputStream bo=new ObjectOutputStream(out);
+                ObjectInputStream bi=new ObjectInputStream(in);) {
+			bo.writeObject(this);
+			copy=(CNF) bi.readObject();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return copy;
+	}
 
     @Override
     public String toString() {

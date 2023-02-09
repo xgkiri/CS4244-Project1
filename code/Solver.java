@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.io.*;
 
 class Solver {
     private CNF cnf;
@@ -14,20 +13,23 @@ class Solver {
     
     CNF solveSAT() {
         // main method to solve SAT problem
-        CNF cnfCopy = this.cnf;
+        CNF cnfCopy = this.cnf.deepClone();
         while(true) {
+            unitPropagation();
+            if(findConflict()) {
+                if(this.currentLevel == 0) {
+                    // UNSAT
+                    return null;
+                }
+                else {
+                    backTrack(learnFromConflict());
+                    continue;
+                }
+            }
+            // make decision
             if(doOneDecision() == true) {
                 // have unassigned literal
-                unitPropagation();
-                if(findConflict()) {
-                    if(currentLevel == 0) {
-                        // UNSAT
-                        return null;
-                    }
-                    else {
-                        backTrack(learnFromConflict());
-                    }
-                }
+                continue;
             }
             else {
                 // have no unassigned literal --> SAT solved
@@ -166,7 +168,9 @@ class Solver {
     }
 
     void reAssignFromTrace(Trace trace) {
-        this.cnf.clearAssignment();
+        CNF cnfCopy = this.cnf.deepClone();
+        cnfCopy.clearAssignment();
+        this.cnf = cnfCopy;
         for(TraceUnit traceUnit : trace.getTraceUnits()) {
             this.cnf.assign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
         }
