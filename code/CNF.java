@@ -1,14 +1,10 @@
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Literal {
+class Literal implements Serializable{
+    private static final long serialVersionUID = 1L;
     private final String symbol;
     private final boolean haveNot; 
     private int assignment;
@@ -56,6 +52,10 @@ class Literal {
         return this.symbol.equals(other.symbol);
     }
 
+    boolean isConflictLiteral() {
+        return this.symbol.equals("#");
+    }
+
     Literal assignmentReverse() {
         if(this.assignment == 1) {
             return new Literal(this.symbol, -1, false);
@@ -84,7 +84,8 @@ class Literal {
 }
 
 
-class Clause {
+class Clause implements Serializable{
+    private static final long serialVersionUID = 1L;
     private Literal[] literals;
 
     Clause(Literal[] literals) {
@@ -175,6 +176,7 @@ class Clause {
 
 
 class CNF implements Serializable{
+    private static final long serialVersionUID = 1L;
     private ArrayList<Clause> clauses;
 
     CNF(ArrayList<Clause> clauses) {
@@ -229,26 +231,6 @@ class CNF implements Serializable{
         }
     }
 
-    CNF deepClone() {
-		CNF copy = null;
-		PipedOutputStream out=new PipedOutputStream();
-		PipedInputStream in=new PipedInputStream();
-		try {
-			in.connect(out);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		try(ObjectOutputStream bo=new ObjectOutputStream(out);
-                ObjectInputStream bi=new ObjectInputStream(in);) {
-			bo.writeObject(this);
-			copy=(CNF) bi.readObject();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return copy;
-	}
-
     @Override
     public String toString() {
         String cnfString = "{";
@@ -269,12 +251,12 @@ class CNF implements Serializable{
 * 2. clause = (r|!p|q ... )
 */
 
-class CNFconstructor {
+class CnfConstructor {
     private final Pattern clausePattern;
     private final Pattern symbolPattern;
     private final Pattern notPattern;
 
-    CNFconstructor(){
+    CnfConstructor(){
         this.clausePattern = Pattern.compile("\\((.*)\\)");
         this.symbolPattern = Pattern.compile("!?(.*)");
         this.notPattern = Pattern.compile("!");

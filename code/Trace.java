@@ -36,6 +36,10 @@ class TraceUnit {
         return this.clause == null;
     }
 
+    boolean isConflictUnit() {
+        return this.literal.isConflictLiteral(); 
+    }
+
     boolean isDirectSuccessorOf(TraceUnit traceUnit) {
         if(this.clause == null) {
             return false;
@@ -44,6 +48,10 @@ class TraceUnit {
             return this.clause.contains(traceUnit.literal) && 
                 !this.literal.sameLiteral(traceUnit.literal);
         }
+    }
+
+    boolean isDirectAncestorOf(TraceUnit traceUnit) {
+        return traceUnit.isDirectSuccessorOf(this);
     }
 
     @Override
@@ -103,14 +111,23 @@ class Trace {
          */ 
     }
 
+    TraceUnit findConflictUnit() {
+        for(TraceUnit traceUnit : this.traceUnits) {
+            if(traceUnit.isConflictUnit()) {
+                return traceUnit;
+            }
+        }
+        return null;
+    }
+
     ArrayList<TraceUnit> findSuccessor(TraceUnit traceUnit) {
         // use DFS to find successors of the given trace unit (in a multi-connected directed graph)
         ArrayList<TraceUnit> successorList = new ArrayList<TraceUnit>();
-        DFS(successorList, traceUnit);
+        dfsForSuccessor(successorList, traceUnit);
         return successorList;
     }
 
-    void DFS(ArrayList<TraceUnit> successorList, TraceUnit traceUnit) {
+    void dfsForSuccessor(ArrayList<TraceUnit> successorList, TraceUnit traceUnit) {
         ArrayList<TraceUnit> directSuccessorList = findDirectSuccessor(traceUnit);
         if(directSuccessorList.isEmpty()) {
             return;
@@ -120,7 +137,7 @@ class Trace {
                 // multi-connected graph
                 if(!successorList.contains(directSuccessor)) {
                     successorList.add(directSuccessor);
-                    DFS(successorList, directSuccessor);
+                    dfsForSuccessor(successorList, directSuccessor);
                 }
             }
         }
@@ -134,6 +151,47 @@ class Trace {
             }
         }
         return directSuccessorList;
+    }
+
+    ArrayList<TraceUnit> findAncestor(TraceUnit traceUnit) {
+        ArrayList<TraceUnit> ancestorList = new ArrayList<TraceUnit>();
+        dfsForAncestor(ancestorList, traceUnit);
+        return ancestorList;
+    }
+
+    void dfsForAncestor(ArrayList<TraceUnit> ancestorList, TraceUnit traceUnit) {
+        ArrayList<TraceUnit> directAncestorListList = findDirectAncestor(traceUnit);
+        if(directAncestorListList.isEmpty()) {
+            return;
+        }
+        else {
+            for(TraceUnit directAncestor : directAncestorListList) {
+                if(!ancestorList.contains(directAncestor)) {
+                    ancestorList.add(directAncestor);
+                    dfsForAncestor(ancestorList, directAncestor);
+                }
+            }
+        }
+    }
+
+    ArrayList<TraceUnit> findDirectAncestor(TraceUnit ancestor) {
+        ArrayList<TraceUnit> directAncestorList = new ArrayList<TraceUnit>();
+        for(TraceUnit traceUnit : this.traceUnits) {
+            if(traceUnit.isDirectAncestorOf(ancestor)) {
+                directAncestorList.add(traceUnit);
+            }
+        }
+        return directAncestorList;
+    }
+
+    ArrayList<TraceUnit> getIntersection(ArrayList<TraceUnit> p, ArrayList<TraceUnit> q) {
+        ArrayList<TraceUnit> intersection = new ArrayList<TraceUnit>();
+        for(TraceUnit traceUnit : p) {
+            if(q.contains(traceUnit)) {
+                intersection.add(traceUnit);
+            }
+        }
+        return intersection;
     }
 
     ArrayList<TraceUnit> getComplement(ArrayList<TraceUnit> listToExclude) {

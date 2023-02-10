@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 class Solver {
     private CNF cnf;
-    private Trace trace;
+    Trace trace;
     private int currentLevel;
     
     Solver(CNF cnf) {
@@ -13,7 +13,7 @@ class Solver {
     
     CNF solveSAT() {
         // main method to solve SAT problem
-        CNF cnfCopy = this.cnf.deepClone();
+        CNF cnfCopy = CloneUnit.deepClone(this.cnf);
         while(true) {
             unitPropagation();
             if(findConflict()) {
@@ -33,7 +33,7 @@ class Solver {
             }
             else {
                 // have no unassigned literal --> SAT solved
-                reAssignFromTrace(cnfCopy , this.trace);
+                cnfCopy = reAssignFromTrace(cnfCopy , this.trace);
                 return cnfCopy;
             }
         }
@@ -102,9 +102,12 @@ class Solver {
     int learnFromConflict() {  
         // learn new clause and add it into CNF
         TraceUnit UIP = this.trace.findUIP(this.currentLevel);
+        TraceUnit conflictUnit = this.trace.findConflictUnit();
         ArrayList<TraceUnit> successorList = this.trace.findSuccessor(UIP);
-        ArrayList<TraceUnit> complementList = this.trace.getComplement(successorList);
-        return getConflictReason(complementList, successorList);
+        ArrayList<TraceUnit> ancestorList = this.trace.findAncestor(conflictUnit);
+        ArrayList<TraceUnit> intersection = this.trace.getIntersection(successorList, ancestorList);
+        ArrayList<TraceUnit> complementList = this.trace.getComplement(intersection);
+        return getConflictReason(complementList, intersection);
     }
 
     int getConflictReason(ArrayList<TraceUnit> complementList, ArrayList<TraceUnit> successorList) {
@@ -168,7 +171,7 @@ class Solver {
     }
 
     void reAssignFromTrace(Trace trace) {
-        CNF cnfCopy = this.cnf.deepClone();
+        CNF cnfCopy = CloneUnit.deepClone(this.cnf);
         cnfCopy.clearAssignment();
         this.cnf = cnfCopy;
         for(TraceUnit traceUnit : trace.getTraceUnits()) {
@@ -176,11 +179,12 @@ class Solver {
         }
     }
 
-    void reAssignFromTrace(CNF cnf, Trace trace) {
+    CNF reAssignFromTrace(CNF cnf, Trace trace) {
         cnf.clearAssignment();
         for(TraceUnit traceUnit : trace.getTraceUnits()) {
             cnf.assign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
         }
+        return cnf;
     }
 
     @Override
