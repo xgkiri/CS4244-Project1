@@ -4,16 +4,19 @@ class Solver {
     private CNF cnf;
     Trace trace;
     private int currentLevel;
+    private State state;
     
-    Solver(CNF cnf) {
+    Solver(CNF cnf, double gamma) {
         this.cnf = cnf;
         this.trace = new Trace(new ArrayList<TraceUnit>());
         this.currentLevel = 0;
+        this.state = new State(gamma);
     }
     
     String solveSAT() {
         // main method to solve SAT problem
         // CNF cnfCopy = CloneUnit.deepClone(this.cnf);
+        initState();
         while(true) {
             unitPropagation();
             if(findConflict()) {
@@ -41,6 +44,18 @@ class Solver {
         }
     }
 
+    void initState() {
+        for (Clause clause : this.cnf.getClauses()) {
+            for (Literal literal : clause.getLiterals()) {
+                this.state.add(literal);
+            }
+        }
+    }
+
+    // TODO: modify this part: 
+    //       1. using the literal in state with the max score,
+    //          then need to delete it from state
+    //       2. add a counter to update the state periodly
     boolean doOneDecision() {
         Literal literal = findUnassignedLiteral();
         if(literal == null) {
@@ -151,9 +166,11 @@ class Solver {
             }
         }
         // create new clause and add it into cnf
+        // NOTE: here we increase the score of literals in new-learned clause
         Literal[] literalsOfClause = new Literal[literals.size()];
         for(int i = 0; i < literals.size(); i++) {
             literalsOfClause[i] = literals.get(i);
+            state.inc(literals.get(i));
         }
         this.cnf.addClause(new Clause(literalsOfClause));
         // return the level to go back

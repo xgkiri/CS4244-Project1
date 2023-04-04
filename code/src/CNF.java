@@ -96,6 +96,10 @@ class Clause implements Serializable{
         this.literals = literals;
     }
 
+    Literal[] getLiterals() {
+        return this.literals;
+    }
+
     boolean isFalse() {
         for(Literal literal : literals) {
             if(literal.getValue() != 0) {
@@ -185,6 +189,10 @@ class CNF implements Serializable{
 
     CNF(ArrayList<Clause> clauses) {
         this.clauses = clauses;
+    }
+
+    ArrayList<Clause> getClauses() {
+        return this.clauses;
     }
 
     void addClause(Clause clause) {
