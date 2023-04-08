@@ -22,8 +22,8 @@ class Score {
 class State {
     protected ArrayList<Score> scores;
     private final double gamma;
-    // ascending order
-    private final Comparator<Score> comp = (x, y) -> (y.score - x.score) > 0 ? 1 : 0;
+    // descending order
+    private final Comparator<Score> comp = (x, y) -> (y.score - x.score) > 0 ? 1 : -1;
 
     State(double gamma) {
         this.scores = new ArrayList<Score>();
@@ -33,7 +33,7 @@ class State {
     void add(Literal literal) {
         for (Score score : scores) {
             if (score.literal.sameLiteral(literal)) {
-                return;
+                score.score += 1;
             }
         }
         this.scores.add(new Score(literal));
@@ -58,7 +58,12 @@ class State {
 
     Literal getMax() {
         this.doSorting();
-        return this.scores.get(0).literal;
+        try {
+            return this.scores.get(0).literal;
+        }
+        catch (IndexOutOfBoundsException ex) {
+            return null;
+        }
     }
 
     void update() {

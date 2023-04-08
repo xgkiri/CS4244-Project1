@@ -1,16 +1,19 @@
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 class Solver {
     private CNF cnf;
-    Trace trace;
+    protected Trace trace;
     private int currentLevel;
     private State state;
+    private int counter;
     
     Solver(CNF cnf, double gamma) {
         this.cnf = cnf;
         this.trace = new Trace(new ArrayList<TraceUnit>());
         this.currentLevel = 0;
         this.state = new State(gamma);
+        this.counter = 0;
     }
     
     String solveSAT() {
@@ -31,7 +34,7 @@ class Solver {
                 }
             }
             // make decision
-            if(doOneDecision() == true) {
+            if(doOneDecision(this.findUnassignedLiteral()) == true) {
                 // have unassigned literal
                 continue;
             }
@@ -56,8 +59,9 @@ class Solver {
     //       1. using the literal in state with the max score,
     //          then need to delete it from state
     //       2. add a counter to update the state periodly
-    boolean doOneDecision() {
-        Literal literal = findUnassignedLiteral();
+    boolean doOneDecision(Supplier<Literal> pickBranchingVariable) {
+        Literal literal = pickBranchingVariable.get();
+        this.counter += 1;
         if(literal == null) {
             return false;
         }
@@ -70,10 +74,17 @@ class Solver {
         }
     }
 
-    Literal findUnassignedLiteral() {
-        // NOTE: can be improved by using a better heuristic?
-        // see 2.(1) PickBranchingVariable
-        return this.cnf.findUnassignedLiteral();
+    Supplier<Literal> findUnassignedLiteral() {
+        // naive approach: choose the first meet unasigned
+        return () -> this.cnf.findUnassignedLiteral();
+    }
+
+    Supplier<Literal> findMaxScore() {
+        // VSIDS
+        Literal max = this.state.getMax();
+        this.state.delete(max);
+        this.state.update();
+        return () -> max;
     }
 
     void broadcastAssign(Literal literal, int value) {
@@ -190,9 +201,10 @@ class Solver {
     }
 
     void reAssignFromTrace(Trace trace) {
-        CNF cnfCopy = CloneUnit.deepClone(this.cnf);
-        cnfCopy.clearAssignment();
-        this.cnf = cnfCopy;
+        //CNF cnfCopy = CloneUnit.deepClone(this.cnf);
+        //cnfCopy.clearAssignment();
+        //this.cnf = cnfCopy;
+        this.cnf.clearAssignment();
         for(TraceUnit traceUnit : trace.getTraceUnits()) {
             this.cnf.assign(traceUnit.getLiteral(), traceUnit.getLiteral().getAssignment());
         }
@@ -219,7 +231,7 @@ class Solver {
             }
         }
         result = result.substring(0, result.length() - 2);
-        result += "]";
+        result += "]\n" + "Decision times: " + this.counter;
         return result;
     }
 
