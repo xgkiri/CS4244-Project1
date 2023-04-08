@@ -34,7 +34,7 @@ class Solver {
                 }
             }
             // make decision
-            if(doOneDecision(this.findUnassignedLiteral()) == true) {
+            if(doOneDecision(this.findMaxScore()) == true) {
                 // have unassigned literal
                 continue;
             }
@@ -54,11 +54,9 @@ class Solver {
             }
         }
     }
-
-    // TODO: modify this part: 
-    //       1. using the literal in state with the max score,
-    //          then need to delete it from state
-    //       2. add a counter to update the state periodly
+    
+    // NOTE: This method takes in a pick branching variable method
+    // currently usable methods: 1. findUnassignedLiteral() 2. findMaxScore()
     boolean doOneDecision(Supplier<Literal> pickBranchingVariable) {
         Literal literal = pickBranchingVariable.get();
         this.counter += 1;
@@ -82,8 +80,10 @@ class Solver {
     Supplier<Literal> findMaxScore() {
         // VSIDS
         Literal max = this.state.getMax();
-        this.state.delete(max);
-        this.state.update();
+        if (max != null) {
+            // this.state.delete(max);
+            this.state.update();
+        }
         return () -> max;
     }
 
