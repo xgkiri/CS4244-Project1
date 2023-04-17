@@ -1,14 +1,23 @@
+package solver;
+
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-class Solver {
+import cnf.CNF;
+import cnf.Clause;
+import cnf.Literal;
+import trace.Trace;
+import trace.TraceUnit;
+import state.State;
+
+public class Solver {
     private CNF cnf;
     protected Trace trace;
     private int currentLevel;
     private State state;
     private int counter;
     
-    Solver(CNF cnf, double gamma) {
+    public Solver(CNF cnf, double gamma) {
         this.cnf = cnf;
         this.trace = new Trace(new ArrayList<TraceUnit>());
         this.currentLevel = 0;
@@ -16,7 +25,7 @@ class Solver {
         this.counter = 0;
     }
     
-    String solveSAT() {
+    public String solveSAT() {
         // main method to solve SAT problem
         // CNF cnfCopy = CloneUnit.deepClone(this.cnf);
         initState();
@@ -178,12 +187,10 @@ class Solver {
         }
         // create new clause and add it into cnf
         // NOTE: here we increase the score of literals in new-learned clause
-        Literal[] literalsOfClause = new Literal[literals.size()];
         for(int i = 0; i < literals.size(); i++) {
-            literalsOfClause[i] = literals.get(i);
             state.inc(literals.get(i));
         }
-        this.cnf.addClause(new Clause(literalsOfClause));
+        this.cnf.addClause(new Clause(literals));
         // return the level to go back
         if(sameFlag == false) {
             return secondLevel;

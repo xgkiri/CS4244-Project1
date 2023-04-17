@@ -1,25 +1,10 @@
+package state;
+
 import java.util.ArrayList;
 import java.util.Comparator;
+import cnf.Literal;
 
-class Score {
-    protected final Literal literal;
-    protected double score;
-
-    Score(Literal literal) {
-        this(literal, 0);
-    }
-
-    Score(Literal literal, double score) {
-        this.literal = literal;
-        this.score = score;
-    }
-
-    boolean equalsTo(Score other) {
-        return this.literal.sameLiteral(other.literal);
-    }
-}
-
-class State {
+public class State {
     protected ArrayList<Score> scores;
     private final double gamma;
     // descending order
@@ -41,12 +26,12 @@ class State {
         }
     };
 
-    State(double gamma) {
+    public State(double gamma) {
         this.scores = new ArrayList<Score>();
         this.gamma = gamma;
     }
 
-    void add(Literal literal) {
+    public void add(Literal literal) {
         for (Score score : scores) {
             if (score.literal.sameLiteral(literal)) {
                 score.score += 1;
@@ -56,7 +41,7 @@ class State {
         this.scores.add(new Score(literal));
     }
 
-    void inc(Literal literal) {
+    public void inc(Literal literal) {
         boolean exist = false;
         for (Score score : scores) {
             if (score.literal.sameLiteral(literal)) {
@@ -73,7 +58,7 @@ class State {
         this.scores.sort(comp);
     }
 
-    Literal getMax() {
+    public Literal getMax() {
         this.doSorting();
         /* 
         try {
@@ -90,7 +75,7 @@ class State {
         }
     }
 
-    void update() {
+    public void update() {
         for (Score score : scores) {
             score.score /= gamma;
         }
