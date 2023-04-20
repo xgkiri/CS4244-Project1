@@ -1,4 +1,5 @@
-import csv
+import numpy as np
+
 def cnf2string(cnf):
     s = ""
     for i in range(len(cnf)):
@@ -42,5 +43,14 @@ def string2cnf(str):
                 else:
                     new_clause.append(prop[literal])
         cnf.append(new_clause)
-    return cnf
+    return cnf, prop
+
+
+def auto_line_feed(string, token):
+    idx = np.array([i for i in range(len(string)) if string[i] == token])
+    for i in range(len(idx)):
+        if i != 0 and i % 4 == 0:
+            string = string[:idx[i] + 1] + '\n' + string[idx[i] + 1:]
+            idx += 1
+    return string
 

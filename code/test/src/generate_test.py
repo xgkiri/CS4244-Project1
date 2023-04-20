@@ -5,8 +5,8 @@ import os
 root = "../data"
 str_data_name = "test_data_str.txt"
 list_data_name = "test_data_list.txt"
-g = Generator(20, 50, 5)
-sample_num = 200
+g = Generator(150, 50, 3)
+sample_num = 20
 CNF_list = []
 CNF_str = []
 for i in range(sample_num):
