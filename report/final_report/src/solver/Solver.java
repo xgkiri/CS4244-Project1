@@ -47,7 +47,8 @@ public class Solver {
                 }
             }
             // make decision
-            if(doOneDecision(this.findMaxScore()) == true) {
+            // NOTE: choose the pick branching variable method here
+            if(doOneDecision(this.findUnassignedLiteral()) == true) {
                 // have unassigned literal
                 continue;
             }
@@ -68,8 +69,12 @@ public class Solver {
         }
     }
     
-    // NOTE: This method takes in a pick branching variable method
-    // currently usable methods: 1. findUnassignedLiteral() 2. findMaxScore()
+    /* 
+     * This method takes in a pick branching variable method
+     * Currently usable methods: 
+     * 1. findUnassignedLiteral(): naive approach  
+     * 2. findMaxScore(): VSIDS algorithm
+     */
     boolean doOneDecision(Supplier<Literal> pickBranchingVariable) {
         Literal literal = pickBranchingVariable.get();
         this.decisionCounter += 1;
@@ -91,7 +96,7 @@ public class Solver {
     }
 
     Supplier<Literal> findMaxScore() {
-        // VSIDS
+        // VSIDS algorithm
         Literal max = this.state.getMax();
         if (this.conflictCounter != 0 && this.conflictCounter % DECAY_FREQ == 0) {
             this.state.update();
@@ -242,7 +247,7 @@ public class Solver {
             }
         }
         result = result.substring(0, result.length() - 2);
-        result += "]"
+        result += "]";
         return result;
     }
 

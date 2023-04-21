@@ -46,6 +46,23 @@ def string2cnf(str):
     return cnf, prop
 
 
+def cnf2dimacs(cnf, prop_num):
+    s = "p cnf " + str(prop_num) + " " + str(len(cnf)) + "\n"
+    for i in range(len(cnf)):
+        clause = cnf[i]
+        for j in range(len(clause)):
+            variable = clause[j]
+            s += str(variable)
+            if j != len(clause) - 1:
+                s += " "
+            else:
+                s += " 0"
+        if i != len(cnf) - 1:
+            s += "\n"
+    return s
+
+
+
 def auto_line_feed(string, token):
     idx = np.array([i for i in range(len(string)) if string[i] == token])
     for i in range(len(idx)):

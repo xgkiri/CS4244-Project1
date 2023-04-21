@@ -13,6 +13,7 @@ class Main {
             "* enter '1' : string format(Debug)\n" + 
             "* enter '2' : DIMACS format");
         int mode = sc.nextInt();
+        sc.nextLine();
         if (mode == 1) {
             System.out.println("---string---");
             System.out.println("Please enter the formula in format:\n" + 
@@ -24,7 +25,6 @@ class Main {
             CNFConstructorString cons = new CNFConstructorString();
             cnf = cons.string2CNF(cnfString);
         } else {
-            sc.nextLine();
             CNFConstructorDIMACS cons = new CNFConstructorDIMACS();
             System.out.println("---DIMACS---");
             System.out.println("Please enter the formula in DIMACS format:");

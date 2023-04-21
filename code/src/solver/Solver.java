@@ -15,14 +15,17 @@ public class Solver {
     protected Trace trace;
     private int currentLevel;
     private State state;
-    private int counter;
+    private int decisionCounter;
+    private int conflictCounter;
+    static final int DECAY_FREQ = 4;
     
     public Solver(CNF cnf, double gamma) {
         this.cnf = cnf;
         this.trace = new Trace(new ArrayList<TraceUnit>());
         this.currentLevel = 0;
         this.state = new State(gamma);
-        this.counter = 0;
+        this.decisionCounter = 0;
+        this.conflictCounter = 0;
     }
     
     public String solveSAT() {
@@ -32,6 +35,7 @@ public class Solver {
         while(true) {
             unitPropagation();
             if(findConflict()) {
+                this.conflictCounter += 1;
                 if(this.currentLevel == 0) {
                     // UNSAT
                     // return null;
@@ -43,7 +47,8 @@ public class Solver {
                 }
             }
             // make decision
-            if(doOneDecision(this.findMaxScore()) == true) {
+            // NOTE: choose the pick branching variable method here
+            if(doOneDecision(this.findUnassignedLiteral()) == true) {
                 // have unassigned literal
                 continue;
             }
@@ -64,11 +69,15 @@ public class Solver {
         }
     }
     
-    // NOTE: This method takes in a pick branching variable method
-    // currently usable methods: 1. findUnassignedLiteral() 2. findMaxScore()
+    /* 
+     * This method takes in a pick branching variable method
+     * Currently usable methods: 
+     * 1. findUnassignedLiteral(): naive approach  
+     * 2. findMaxScore(): VSIDS algorithm
+     */
     boolean doOneDecision(Supplier<Literal> pickBranchingVariable) {
         Literal literal = pickBranchingVariable.get();
-        this.counter += 1;
+        this.decisionCounter += 1;
         if(literal == null) {
             return false;
         }
@@ -87,11 +96,11 @@ public class Solver {
     }
 
     Supplier<Literal> findMaxScore() {
-        // VSIDS
+        // VSIDS algorithm
         Literal max = this.state.getMax();
-        if (max != null) {
-            // this.state.delete(max);
+        if (this.conflictCounter != 0 && this.conflictCounter % DECAY_FREQ == 0) {
             this.state.update();
+            this.conflictCounter = 0;
         }
         return () -> max;
     }
@@ -238,7 +247,7 @@ public class Solver {
             }
         }
         result = result.substring(0, result.length() - 2);
-        result += "]\n" + "Decision times: " + this.counter;
+        result += "]";
         return result;
     }
 
